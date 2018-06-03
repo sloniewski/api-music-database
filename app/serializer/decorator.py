@@ -2,16 +2,23 @@ from functools import wraps
 
 from flask import abort, Response
 
-from .base import Parser
+from .base import Serializer
 
-def apply_media_type(req):
-    content_type = req.headers.get('content_type')
-    if content_type.lower() not in Parser.supported_types():
-        abort(415)
+def apply_media_type(**kwargs):
+    try:
+        req = kwargs.pop('request')
+    except KeyError:
+        abort(500)
     def decorator(function):
         @wraps(function)
         def wrapper(*args, **kwargs):
-            data = Parser.parse(
+            content_type = req.headers.get('content_type')
+            if content_type is None:
+                content_type = 'application/json'
+            if content_type.lower() not in Serializer.supported_types():
+                abort(415)
+
+            data = Serializer.serialize(
                 data_dict=function(*args, **kwargs),
                 content_type=content_type
             )
