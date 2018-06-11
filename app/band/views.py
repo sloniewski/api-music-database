@@ -1,8 +1,8 @@
-from flask import Blueprint, request
+from flask import request, g
 from app.serializer.decorator import apply_media_type
 from app.auth.decorator import token_required
 
-band = Blueprint('band', __name__)
+from . import band
 
 
 @band.route('/<string:slug>', methods=['GET'])
@@ -19,16 +19,24 @@ def get_band(slug):
 @token_required(request=request)
 def band_handler(slug):
 
+    def put():
+        pass
+
+    def patch():
+        pass
+
     def delete(req, slug):
         return '!'
 
     handlers = {
+        'put': put,
+        'patch': patch,
         'delete': delete,
     }  
     return handlers[request.method.lower()](req=request, slug=slug)
 
 
-@band.route('/', methods=['GET', 'POST'])
+@band.route('/', methods=['GET'])
 @apply_media_type(request=request)
 def get_bands():
     data = {
@@ -43,7 +51,7 @@ def get_bands():
     return data
 
 
-@band.route('/', methods=['GET', 'POST'])
+@band.route('/', methods=['POST'])
 @token_required(request=request)
 def post_bands():
     return '!'

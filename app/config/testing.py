@@ -1,0 +1,3 @@
+
+class TestingConfig:
+    DEBUG = True

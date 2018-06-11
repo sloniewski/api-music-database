@@ -1,7 +1,5 @@
-from flask import Blueprint
+from . import album
 
-
-album = Blueprint('album', __name__)
 
 @album.route('/1')
 def test_1():
