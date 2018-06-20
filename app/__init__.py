@@ -1,16 +1,20 @@
 from flask import Flask
 
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
+from app.config import config
 
-from .config import config
-from .album import album
-from .band import band
 
 def create_app(config_name):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
 
+    # register blueprints
+    from app.album import album
+    from app.band import band
     app.register_blueprint(album, url_prefix='/albums')
     app.register_blueprint(band, url_prefix='/bands')
+
+    # register models
+    from app.album.models import db as album_db
+    album_db.init_app(app)
+
     return app
