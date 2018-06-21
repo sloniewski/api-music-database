@@ -1,7 +1,9 @@
 from flask import Flask
 
+from flask_sqlalchemy import SQLAlchemy
 from app.config import config
 
+db = SQLAlchemy()
 
 def create_app(config_name):
     app = Flask(__name__)
@@ -14,7 +16,6 @@ def create_app(config_name):
     app.register_blueprint(band, url_prefix='/bands')
 
     # register models
-    from app.album.models import db as album_db
-    album_db.init_app(app)
+    db.init_app(app=app)
 
     return app

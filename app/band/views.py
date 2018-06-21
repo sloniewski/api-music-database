@@ -3,17 +3,14 @@ from app.serializer.decorator import apply_media_type
 from app.auth.decorator import token_required
 
 from . import band
+from .models import Band
 
 
-@band.route('/<string:slug>', methods=['GET'])
+@band.route('/<int:id>', methods=['GET'])
 @apply_media_type(request=request)
-def get_band(slug):
-    data = {
-        'uid': slug,
-        'name': 'Foo Fighters',
-        'date': '1995',
-    }
-    return data
+def get_band(id):
+    band = Band.query.get_or_404(id)
+    return {'name': band.name }
 
 @band.route('/<string:slug>', methods=['PUT', 'DELETE', 'PATCH'])
 @token_required(request=request)
