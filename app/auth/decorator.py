@@ -11,7 +11,7 @@ def token_required(**kwargs):
     def decorator(function):
         @wraps(function)
         def wrapper(*args, **kwargs):
-            token = req.headers.get('Authorization')
+            token = req.headers.get('X-Auth-Token')
             if token is None:
                 abort(401)
             return function(*args, **kwargs)

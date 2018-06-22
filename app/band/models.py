@@ -17,13 +17,30 @@ class Band(db.Model):
         'Album',
         backref=db.backref('albums', lazy=True)
     )
+
+    @property
+    def id(self):
+        return self.band_id
     
     def as_dict(self):
         result = {}
         for attrib in dir(self):
             if '__' not in attrib:
                 value = getattr(self, attrib, '')
-                result.update({attrib: value})
+                if isinstance(value,(int, str, float)):
+                    result.update({attrib: value})
+                if isinstance(value, (list)):
+                    temp_list = []
+                    for x in value:
+                        if isinstance(x,(int, str, float)):
+                            temp_list.append(x)
+                        if isinstance(x,(db.Model)):
+                            temp_list.append(str(x))
+                    result.update({attrib: temp_list})
+        return result
     
     def __str__(self):
         return "{} {}/{}".format(self.name, self.city, self.country)
+    
+    def __repr__(self):
+        return self.__str__()

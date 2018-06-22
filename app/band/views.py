@@ -1,6 +1,8 @@
 from flask import request, g
 from app.serializer.decorator import apply_media_type
 from app.auth.decorator import token_required
+from app import db
+
 
 from . import band
 from .models import Band
@@ -15,8 +17,10 @@ def band_get(id):
 
 @band.route('/<int:id>', methods=['DELETE'])
 @token_required(request=request)
-def band_delete(slug):
-    return '!'
+def band_delete(id):
+    band = Band.query.get_or_404(id)
+    db.session.delete(band)
+    return '', 204
 
 
 @band.route('/<int:id>', methods=['PUT'])
