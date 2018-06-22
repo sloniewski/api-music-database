@@ -13,5 +13,10 @@ class Band(db.Model):
     city = db.Column(db.String(64), nullable=True)
     country = db.Column(db.String(64), nullable=True)
     
-    albums = db.relationship('Album',
-                               backref=db.backref('albums', lazy=True))
+    albums = db.relationship(
+        'Album',
+        backref=db.backref('albums', lazy=True)
+    )
+    
+    def __str__(self):
+        return "{} {}/{}".format(self.name, self.city, self.country)

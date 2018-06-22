@@ -16,3 +16,6 @@ class Album(db.Model):
                       onupdate='CASCADE'),
         nullable=False,
     )
+    
+    def __str__(self):
+        return "{} {}".format(self.name, self.year_released)
