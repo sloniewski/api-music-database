@@ -10,7 +10,7 @@ from .models import Band
 @apply_media_type(request=request)
 def band_get(id):
     band = Band.query.get_or_404(id)
-    return Band.as_dict()
+    return band.as_dict()
 
 
 @band.route('/<int:id>', methods=['DELETE'])
