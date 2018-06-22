@@ -18,5 +18,12 @@ class Band(db.Model):
         backref=db.backref('albums', lazy=True)
     )
     
+    def as_dict(self):
+        result = {}
+        for attrib in dir(self):
+            if '__' not in attrib:
+                value = getattr(self, attrib, '')
+                result.update({attrib: value})
+    
     def __str__(self):
         return "{} {}/{}".format(self.name, self.city, self.country)
