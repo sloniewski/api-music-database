@@ -16,9 +16,6 @@ class TestBandCollection(unittest.TestCase):
         self.client = self.app.test_client()
         db.create_all()
 
-    def tearDown(self):
-        os.remove('app/test.db')        
-
     def test_get_bands(self):
         response = self.client.get(
             'http://localhost:5000/bands/', 
@@ -49,9 +46,6 @@ class TestBandResource(unittest.TestCase):
         )
         db.session.add(self.test_band)
         db.session.commit()
-
-    def tearDown(self):
-        os.remove('app/test.db')        
 
     def test_get_band(self):
         response = self.client.get(

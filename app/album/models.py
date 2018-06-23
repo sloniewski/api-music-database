@@ -1,3 +1,4 @@
+from flask import url_for
 from flask_sqlalchemy import SQLAlchemy
 
 from app import db
@@ -17,5 +18,11 @@ class Album(db.Model):
         nullable=False,
     )
     
+    def get_absolute_url(self):
+        return url_for('album.get_album', id=self.album_id)
+
     def __str__(self):
         return "{} {}".format(self.name, self.year_released)
+
+    def __repr__(self):
+        return self.__str__()

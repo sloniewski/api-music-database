@@ -10,7 +10,7 @@ from .models import Band
 
 @band.route('/<int:id>', methods=['GET'])
 @apply_media_type(request=request)
-def band_get(id):
+def get_band(id):
     band = Band.query.get_or_404(id)
     return band.as_dict()
 

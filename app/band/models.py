@@ -1,6 +1,9 @@
+from flask import url_for
 from flask_sqlalchemy import SQLAlchemy
 
 from app import db
+
+from . import band
 
 
 class Band(db.Model):
@@ -21,6 +24,9 @@ class Band(db.Model):
     @property
     def id(self):
         return self.band_id
+
+    def get_absolute_url(self):
+        return url_for('band.get_band', id=self.band_id)
     
     def as_dict(self):
         result = {}

@@ -1,7 +1,7 @@
 from . import album
 from .models import Album
 
-@album.route('/<pk>')
-def test_1(pk):
-    album = Album.query.get_or_404(pk)
+@album.route('/<int:id>')
+def get_album(id):
+    album = Album.query.get_or_404(id)
     return album.name

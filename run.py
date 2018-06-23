@@ -1,5 +1,6 @@
-from app import create_app
+import os
 import argparse
+from app import create_app
 
 def set_options():
     parser = argparse.ArgumentParser()
