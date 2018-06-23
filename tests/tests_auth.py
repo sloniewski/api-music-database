@@ -5,8 +5,6 @@ from app import create_app, db
 from app.auth.models import User
 
 
-from unittest import skip
-
 class TestAuthModule(unittest.TestCase):
 
     def setUp(self):
@@ -61,8 +59,22 @@ class TestAuthModule(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.headers.get('X-Auth-Token'))
 
+    def test_get_token(self):
+        token1 = self.test_user.get_token()
+        token2 = self.test_user.get_token()
+        self.assertEqual(token1, token2)
+
     def test_logout_view(self):
+        token = self.test_user.get_token()
         response = self.client.post(
-            'http://localhost:5000/auth/login'
+            'http://localhost:5000/auth/logout',
+            headers={'X-Auth-Token': token},
         )
         self.assertEqual(response.status_code, 200)
+
+    def test_fail_logout(self):
+        response = self.client.post(
+            'http://localhost:5000/auth/logout',
+            headers={'X-Auth-Token': 'whatever'},
+        )
+        self.assertEqual(response.status_code, 401)
