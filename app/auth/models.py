@@ -1,6 +1,28 @@
+from datetime import datetime, timedelta
+
 from werkzeug.security import check_password_hash
 
 from app import db
+
+
+class Token(db.Model):
+    __tablename__ = 'token'
+
+    token_id = db.Column(db.Integer, primary_key=True)
+    uuid = db.Column(db.String(256), nullable=False)
+    valid_to = db.Column(db.DateTime, nullable=False)
+
+    user = db.Column(
+        db.Integer,
+        db.ForeignKey('user.user_id', ondelete='NO ACTION', onupdate='CASCADE'),
+        nullable=False
+    )
+
+    def __str__(self):
+        return 'Token: {}'.format(self.token_id)
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class User(db.Model):
@@ -37,24 +59,6 @@ class User(db.Model):
         return check_password_hash(self._password_hash, password)
 
     def get_token(self):
-        # TODO get latest token for user
-        self.tokens.order_by()
+        token = Token.query.with_parent(self).filter(Token.valid_to <= datetime.now()).first()
+        return Token
 
-
-class Token(db.Model):
-    __tablename__ = 'token'
-
-    token_id = db.Column(db.Integer, primary_key=True)
-    uuid = db.Column(db.String(256), nullable=False)
-
-    user = db.Column(
-        db.Integer,
-        db.ForeignKey(User, ondelete='NO ACTION', onupdate='CASCADE'),
-        nullable=False
-    )
-
-    def __str__(self):
-        return 'Token: {}'.format(self.token_id)
-
-    def __repr__(self):
-        return self.__str__()
