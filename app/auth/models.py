@@ -32,6 +32,9 @@ class User(db.Model):
 
     def set_password(self, password):
         self._password_hash = self.generate_hash(password)
+       
+    def verify_password(self):
+        return check_password_hash(self._password_hash, password)
 
     def get_token(self):
         # TODO get latest token for user

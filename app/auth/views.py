@@ -1,5 +1,7 @@
 from . import auth
 
+from .models import User
+
 
 @auth.route('/login')
 def get_token():

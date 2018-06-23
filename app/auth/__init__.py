@@ -10,6 +10,6 @@ from .models import User
 
 def login_user(username, password):
     user = User.query.filter_by(username=username).first()
-    if len(user) == 1 and check_password_hash(user._password_hash, password):
+    if len(user) == 1 and user.verify_password(password):
         return user
     return None
