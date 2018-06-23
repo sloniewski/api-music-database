@@ -21,6 +21,9 @@ class TestBandCollection(unittest.TestCase):
         db.session.add(self.test_band)
         db.session.commit()
 
+    def tearDown(self):
+        db.drop_all()
+
     def test_get_bands(self):
         response = self.client.get(
             'http://localhost:5000/bands/',

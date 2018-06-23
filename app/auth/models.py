@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import db
 
@@ -55,10 +55,10 @@ class User(db.Model):
     def set_password(self, password):
         self._password_hash = self.generate_hash(password)
        
-    def verify_password(self):
+    def verify_password(self, password):
         return check_password_hash(self._password_hash, password)
 
     def get_token(self):
         token = Token.query.with_parent(self).filter(Token.valid_to <= datetime.now()).first()
-        return Token
+        return token
 

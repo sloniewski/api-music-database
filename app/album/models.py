@@ -17,7 +17,7 @@ class Album(db.Model):
                       onupdate='CASCADE'),
         nullable=False,
     )
-    
+
     def get_absolute_url(self):
         return url_for('album.get_album', id=self.album_id)
 
