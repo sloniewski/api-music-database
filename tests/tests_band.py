@@ -5,6 +5,7 @@ import unittest
 from app import create_app, db
 
 from app.band.models import Band
+from app.auth.models import User
 
 
 class TestBandCollection(unittest.TestCase):
@@ -15,9 +16,12 @@ class TestBandCollection(unittest.TestCase):
         self.app_context.push()
         self.client = self.app.test_client()
         db.create_all()
-        self.test_band = Band(
-            name='limp bizkit',
-        )
+        self.test_band = Band(name='test1')
+        self.test_band_2 = Band(name='test2')
+        self.test_user = User(username='abc')
+        self.test_user.set_password('abc')
+        db.session.add(self.test_user)
+        db.session.add(self.test_band_2)
         db.session.add(self.test_band)
         db.session.commit()
 
@@ -44,13 +48,13 @@ class TestBandCollection(unittest.TestCase):
             'http://localhost:5000/bands/{}'.format(self.test_band.band_id),
             headers={'Content-Type': 'application/json'},
         )
-
         self.assertEqual(response.status_code, 200)
 
     def test_delete_band(self):
+        token = self.test_user.get_token()
         response = self.client.delete(
-            'http://localhost:5000/bands/{}'.format(self.test_band.band_id),
-            headers={'X-Auth-Token': '12345'},
+            'http://localhost:5000/bands/{}'.format(self.test_band_2.band_id),
+            headers={'X-Auth-Token': 'whatever'},
         )
         self.assertEqual(response.status_code, 204)
 

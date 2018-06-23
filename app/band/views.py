@@ -47,4 +47,4 @@ def get_bands():
 @token_required(request=request)
 @validate_json(request, 'name')
 def post_bands():
-    return '!'
+    return '',201
