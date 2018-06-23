@@ -21,10 +21,6 @@ class Band(db.Model):
         backref=db.backref('albums', lazy=True)
     )
 
-    @property
-    def id(self):
-        return self.band_id
-
     def get_absolute_url(self):
         return url_for('band.get_band', id=self.band_id)
     

@@ -1,4 +1,6 @@
 from flask import request, g
+
+from app.helpers import validate_json
 from app.serializer.decorator import apply_media_type
 from app.auth.decorator import token_required
 from app import db
@@ -35,7 +37,6 @@ def band_patch(slug):
     return '!'
 
 
-
 @band.route('/', methods=['GET'])
 @apply_media_type(request=request)
 def get_bands():
@@ -44,5 +45,6 @@ def get_bands():
 
 @band.route('/', methods=['POST'])
 @token_required(request=request)
+@validate_json(request, 'name')
 def post_bands():
     return '!'
