@@ -4,11 +4,13 @@ from flask import abort, Response
 
 from .base import Serializer
 
+
 def apply_media_type(**kwargs):
     try:
         req = kwargs.pop('request')
     except KeyError:
         abort(500)
+
     def decorator(function):
         @wraps(function)
         def wrapper(*args, **kwargs):
@@ -16,7 +18,7 @@ def apply_media_type(**kwargs):
             if content_type is None:
                 content_type = 'application/json'
             if content_type.lower() not in Serializer.supported_types():
-                abort(415)
+                content_type = 'application/json'
 
             data = Serializer.serialize(
                 data_dict=function(*args, **kwargs),
