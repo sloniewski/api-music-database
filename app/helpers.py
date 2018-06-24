@@ -31,7 +31,7 @@ def validate_json(req, *expected_args):
     def decorator(func):
         def wrapper(*args, **kwargs):
             try:
-                data = json.loads(req.data)
+                data = req.get_json()
             except json.decoder.JSONDecodeError:
                 abort(400, {'error': 'unable to parse json'})
 

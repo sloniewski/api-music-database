@@ -36,10 +36,13 @@ class TestBandCollection(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_post_bands(self):
-        response = self.client.get(
+        response = self.client.post(
             'http://localhost:5000/bands/',
-            data=json.dumps({'xxx': 'deftones'}),
-            headers={'Content-Type': 'application/json'},
+            data=json.dumps({'name': 'deftones'}),
+            headers={
+                'Content-Type': 'application/json',
+                'X-Auth-Token': self.test_user.get_token(),
+            },
         )
         self.assertEqual(response.status_code, 201)
 
@@ -51,10 +54,9 @@ class TestBandCollection(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_delete_band(self):
-        token = self.test_user.get_token()
         response = self.client.delete(
             'http://localhost:5000/bands/{}'.format(self.test_band_2.band_id),
-            headers={'X-Auth-Token': 'whatever'},
+            headers={'X-Auth-Token': self.test_user.get_token()},
         )
         self.assertEqual(response.status_code, 204)
 
