@@ -26,19 +26,11 @@ class Band(db.Model):
 
     def as_dict(self):
         result = {}
-        for attrib in dir(self):
-            if '__' not in attrib:
-                value = getattr(self, attrib, '')
-                if isinstance(value, (int, str, float)):
-                    result.update({attrib: value})
-                if isinstance(value, (list)):
-                    temp_list = []
-                    for x in value:
-                        if isinstance(x,(int, str, float)):
-                            temp_list.append(x)
-                        if isinstance(x,(db.Model)):
-                            temp_list.append(str(x))
-                    result.update({attrib: temp_list})
+        fields = [
+            'band_id', 'name', 'year_founded',
+            'year_disbanded', 'city', 'country']
+        for field in fields:
+            result.update({field: getattr(self, field, None)})
         return result
 
     def __str__(self):
