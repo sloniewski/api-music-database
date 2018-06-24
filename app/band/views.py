@@ -63,7 +63,7 @@ def get_bands():
 
 
 @band.route('/', methods=['POST'])
-@validate_json(request, 'name')
+@validate_json(request, ['name'])
 @token_required(request=request)
 def post_bands():
     data = request.get_json()

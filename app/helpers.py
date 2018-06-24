@@ -65,7 +65,7 @@ class PaginationHelper:
             limit(self.items_per_page)
 
 
-def validate_json(req, *expected_args):
+def validate_json(req, expected_args, strict=True):
     def decorator(func):
         def wrapper(*args, **kwargs):
             try:
@@ -74,14 +74,20 @@ def validate_json(req, *expected_args):
                 abort(400, {'error': 'unable to parse json'})
 
             missing = set(expected_args) - set(data)
+            errors = {'errors': []}
             if len(missing) != 0:
-                abort(
-                    400, {'error': 'missing data in json: {}'.format(str(missing)[1:-1])})
+                errors['errors'].append(
+                    'missing data in json: {}'.format(str(missing)[1:-1])
+                )
 
             extra = set(data) - set(expected_args)
             if len(extra) != 0:
-                abort(
-                    400, {'error': 'got unexpected data: {}'.format(str(extra)[1:-1])})
+                errors['errors'].append(
+                    'got unexpected data: {}'.format(str(extra)[1:-1])
+                )
+
+            if len(errors['errors']) >= 1:
+                abort(400, errors)
 
             return func(*args, **kwargs)
         return wrapper
