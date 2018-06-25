@@ -1,27 +1,22 @@
+import dicttoxml
 import json
 from functools import wraps
 
-from flask import abort, Response
-import dicttoxml
-
-
-import dicttoxml
-import json
-
-from flask import abort
+from flask import abort, g
 
     
 class JsonSerializer:
-    
+
     def serialize(self, data):
         try:
             data = json.dumps(data)
-        except Exception:
-            abort(415)
+        except json.JSONDecodeError as error:
+            abort(415, error.msg)
         return data
 
+
 class XmlSerializer:
-    
+
     def serialize(self, data):
         try:
             data = dicttoxml.dicttoxml(data)
@@ -35,13 +30,18 @@ class Serializer:
         'application/json': JsonSerializer,
         'application/xml': XmlSerializer,
     }
+
+    def get_serializer_class(self, content_type):
+        return self.serializer_class[content_type]
     
     def __init__(self, content_type):
         try:
-            self.serializer = self.serializer_class[content_type]
+            self.serializer = self.get_serializer_class(content_type)()
+            self.content_type = content_type
         except KeyError:
-            self.serializer = JsonSerializer
-    
+            self.serializer = JsonSerializer()
+            self.content_type = 'application/json'
+
     def serialize(self, data):
         return self.serializer.serialize(data)
 
@@ -55,14 +55,11 @@ def apply_media_type(**kwargs):
     def decorator(function):
         @wraps(function)
         def wrapper(*args, **kwargs):
-            content_type = req.headers.get('content_type')
-            serialzer = Serializer(content_type)
-            response = function(*args, **kwargs)
-            data = serializer.serialize(
-                data=response.data,
-                content_type=content_type,
-            )
-            response.headers.add('Content-Type': serializer.content_type)
-            return response
+            content_type = req.headers.get('Content-Type')
+            serializer = Serializer(content_type)
+            data = function(*args, **kwargs)
+            data = serializer.serialize(data)
+            g.content_type = serializer.content_type
+            return data
         return wrapper
     return decorator

@@ -15,7 +15,7 @@ def token_required(**kwargs):
         def wrapper(*args, **kwargs):
             token = req.headers.get('X-Auth-Token')
             if not validate_token(token):
-                abort(401)
+                abort(401, {'errors': 'invalid or expired token'})
             return function(*args, **kwargs)
         return wrapper
     return decorator

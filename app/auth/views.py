@@ -1,4 +1,4 @@
-from flask import abort, Response, request, redirect
+from flask import abort, Response, request
 from . import auth
 
 from app import db

@@ -1,9 +1,12 @@
 import json
+from functools import wraps
 
-from . import Serializer
+from flask import abort, Response, g
+
 
 def validate_request(req, expected_args, strict=True):
     def decorator(func):
+        @wraps(func)
         def wrapper(*args, **kwargs):
             try:
                 data = req.get_json()
@@ -31,9 +34,11 @@ def validate_request(req, expected_args, strict=True):
     return decorator
 
 
-def process_headers(function):
+def process_response(function):
+    @wraps(function)
     def decorator(*args, **kwargs):
-        response = function(*args, **kwargs)
-        return response
+        data = function(*args, **kwargs)
+        result = Response(response=data)
+        result.headers['Content-Type'] = g.content_type
+        return result
     return decorator
-        

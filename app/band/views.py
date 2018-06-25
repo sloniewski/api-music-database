@@ -1,15 +1,17 @@
-from flask import request, g, url_for
+from flask import request, url_for, Response
 
 from app import db
-from app.helpers import validate_json, PaginationHelper
 from app.auth.decorator import token_required
-from app.serializer.decorator import apply_media_type
+from app.main.serializer import apply_media_type
+from app.main.pagination import PaginationHelper
+from app.main.processors import validate_request, process_response
 
 from . import band
 from .models import Band
 
 
 @band.route('/<int:id>', methods=['GET'])
+@process_response
 @apply_media_type(request=request)
 def get_band(id):
     band = Band.query.get_or_404(id)
@@ -39,6 +41,7 @@ def band_patch(id):
 
 
 @band.route('/', methods=['GET'])
+@process_response
 @apply_media_type(request=request)
 def get_bands():
     bands = db.session.query(Band)
@@ -63,7 +66,7 @@ def get_bands():
 
 
 @band.route('/', methods=['POST'])
-@validate_json(request, ['name'])
+@validate_request(request, ['name'])
 @token_required(request=request)
 def post_bands():
     data = request.get_json()
