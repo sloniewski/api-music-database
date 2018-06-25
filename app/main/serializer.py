@@ -5,24 +5,45 @@ from flask import abort, Response
 import dicttoxml
 
 
+import dicttoxml
+import json
+
+from flask import abort
+
+    
+class JsonSerializer:
+    
+    def serialize(self, data):
+        try:
+            data = json.dumps(data)
+        except Exception:
+            abort(415)
+        return data
+
+class XmlSerializer:
+    
+    def serialize(self, data):
+        try:
+            data = dicttoxml.dicttoxml(data)
+        except Exception:
+            abort(415)
+        return data
+
+    
 class Serializer:
-    serializers = {
-        'application/json': json.dumps,
-        'application/xml': dicttoxml.dicttoxml,
+    serializer_class = {
+        'application/json': JsonSerializer,
+        'application/xml': XmlSerializer,
     }
-
-    @classmethod
-    def get_serializer_for_type(cls, content_type):
-        return cls.serializers[content_type]
-
-    @classmethod
-    def serialize(cls, data_dict, content_type, **kwargs):
-        serializer = cls.get_serializer_for_type(content_type)
-        return serializer(data_dict, **kwargs)
-
-    @classmethod
-    def supported_types(cls):
-        return cls.serializers.keys()
+    
+    def __init__(self, content_type):
+        try:
+            self.serializer = self.serializer_class[content_type]
+        except KeyError:
+            self.serializer = JsonSerializer
+    
+    def serialize(self, data):
+        return self.serializer.serialize(data)
 
 
 def apply_media_type(**kwargs):
@@ -35,21 +56,13 @@ def apply_media_type(**kwargs):
         @wraps(function)
         def wrapper(*args, **kwargs):
             content_type = req.headers.get('content_type')
-            if content_type is None:
-                content_type = 'application/json'
-            if content_type.lower() not in Serializer.supported_types():
-                content_type = 'application/json'
-
-            data = Serializer.serialize(
-                data_dict=function(*args, **kwargs),
-                content_type=content_type
+            serialzer = Serializer(content_type)
+            response = function(*args, **kwargs)
+            data = serializer.serialize(
+                data=response.data,
+                content_type=content_type,
             )
-            headers = {
-                'Content-Type': content_type,
-            }
-            return Response(
-                response=data,
-                headers=headers,
-            )
+            response.headers.add('Content-Type': serializer.content_type)
+            return response
         return wrapper
     return decorator

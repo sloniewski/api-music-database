@@ -1,5 +1,7 @@
 import json
 
+from . import Serializer
+
 def validate_request(req, expected_args, strict=True):
     def decorator(func):
         def wrapper(*args, **kwargs):
@@ -27,3 +29,11 @@ def validate_request(req, expected_args, strict=True):
             return func(*args, **kwargs)
         return wrapper
     return decorator
+
+
+def process_headers(function):
+    def decorator(*args, **kwargs):
+        response = function(*args, **kwargs)
+        return response
+    return decorator
+        
