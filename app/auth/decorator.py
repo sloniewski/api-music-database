@@ -4,11 +4,7 @@ from functools import wraps
 from .functions import validate_token
 
 
-def token_required(**kwargs):
-    try:
-        req = kwargs.pop('request')
-    except KeyError:
-        abort(500)
+def token_required(req):
 
     def decorator(function):
         @wraps(function)

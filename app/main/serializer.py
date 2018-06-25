@@ -4,8 +4,16 @@ from functools import wraps
 
 from flask import abort, g
 
-    
-class JsonSerializer:
+class BaseSerializer:
+
+    def serialize(self, data):
+        raise NotImplementedError('method not implemented')
+
+    def deserialize(self,data):
+        raise NotImplementedError('method not implemented')
+
+
+class JsonSerializer(BaseSerializer):
 
     def serialize(self, data):
         try:
@@ -14,8 +22,15 @@ class JsonSerializer:
             abort(415, error.msg)
         return data
 
+    def deserialize(self, data):
+        try:
+            data = json.loads(str(data, encoding='utf-8'))
+        except json.JSONDecodeError as error:
+            abort(415, error.msg)
+        return data
 
-class XmlSerializer:
+
+class XmlSerializer(BaseSerializer):
 
     def serialize(self, data):
         try:
@@ -45,12 +60,11 @@ class Serializer:
     def serialize(self, data):
         return self.serializer.serialize(data)
 
+    def deserialize(self, data):
+        return self.serializer.deserialize(data)
 
-def apply_media_type(**kwargs):
-    try:
-        req = kwargs.pop('request')
-    except KeyError:
-        abort(500)
+
+def apply_media_type(req):
 
     def decorator(function):
         @wraps(function)

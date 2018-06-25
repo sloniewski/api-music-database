@@ -27,9 +27,9 @@ def get_token():
 
 
 @auth.route('/logout', methods=["POST"])
-@token_required(request=request)
+@token_required(request)
 def destroy_token():
-    '''destroys all tokens for user'''
+    """destroys all tokens for user"""
 
     uuid = request.headers.get('X-Auth-Token')
     token = Token.query.filter(uuid == uuid).first()

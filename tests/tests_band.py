@@ -17,7 +17,9 @@ class TestBandCollection(unittest.TestCase):
         self.client = self.app.test_client()
         db.create_all()
 
-        self.test_band = Band(name='test1')
+        self.test_band = Band(
+            name='test1', city='abc', year_founded=1999, country='lebanon'
+        )
         self.test_band_2 = Band(name='test2')
         self.test_user = User(username='abc')
         self.test_user.set_password('abc')
@@ -36,10 +38,28 @@ class TestBandCollection(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
+    def test_patch_band(self):
+        response = self.client.patch(
+            'http://localhost:5000/bands/' + str(self.test_band.band_id),
+            data=json.dumps({'city': 'xyz'}),
+            headers={
+                'Content-Type': 'application/json',
+                'X-Auth-Token': self.test_user.get_token(),
+            })
+        json_response = response.get_json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json_response['name'], 'test1')
+        self.assertEqual(json_response['year_founded'], 1999)
+        self.assertEqual(json_response['year_disbanded'], None)
+        self.assertEqual(json_response['city'], 'xyz')
+        self.assertEqual(json_response['country'], 'lebanon')
+
     def test_post_bands(self):
         response = self.client.post(
             'http://localhost:5000/bands/',
-            data=json.dumps({'name': 'deftones'}),
+            data=json.dumps({'name': 'deftones', 'year_founded': 1996,
+                             'city': 'somecity', 'year_disbanded': 2011,
+                            'country': 'USA'}),
             headers={
                 'Content-Type': 'application/json',
                 'X-Auth-Token': self.test_user.get_token(),

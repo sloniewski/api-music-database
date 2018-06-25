@@ -2,7 +2,7 @@ from flask import request, url_for, Response
 
 from app import db
 from app.auth.decorator import token_required
-from app.main.serializer import apply_media_type
+from app.main.serializer import apply_media_type, Serializer
 from app.main.pagination import PaginationHelper
 from app.main.processors import validate_request, process_response
 
@@ -12,14 +12,14 @@ from .models import Band
 
 @band.route('/<int:id>', methods=['GET'])
 @process_response
-@apply_media_type(request=request)
+@apply_media_type(request)
 def get_band(id):
     band = Band.query.get_or_404(id)
     return band.as_dict()
 
 
 @band.route('/<int:id>', methods=['DELETE'])
-@token_required(request=request)
+@token_required(request)
 def band_delete(id):
     band = Band.query.get_or_404(id)
     db.session.delete(band)
@@ -27,22 +27,38 @@ def band_delete(id):
 
 
 @band.route('/<int:id>', methods=['PUT'])
-@token_required(request=request)
+@process_response
+@apply_media_type(request)
+@validate_request(request, ['name', 'year_founded', 'city', 'year_disbanded', 'country'])
+@token_required(request)
 def band_put(id):
     band = Band.query.get_or_404(id)
     return '!'
 
 
 @band.route('/<int:id>', methods=['PATCH'])
-@token_required(request=request)
+@process_response
+@apply_media_type(request)
+@token_required(request)
 def band_patch(id):
     band = Band.query.get_or_404(id)
-    return '!'
+
+    content_type = request.headers.get('Content-Type')
+    serializer = Serializer(content_type)
+    data = serializer.deserialize(request.data)
+
+    for key, value in data.items():
+        setattr(band, key, value)
+
+    db.session.add(band)
+    db.session.commit()
+
+    return band.as_dict()
 
 
 @band.route('/', methods=['GET'])
 @process_response
-@apply_media_type(request=request)
+@apply_media_type(request)
 def get_bands():
     bands = db.session.query(Band)
     pagination = PaginationHelper(
@@ -66,8 +82,8 @@ def get_bands():
 
 
 @band.route('/', methods=['POST'])
-@validate_request(request, ['name'])
-@token_required(request=request)
+@validate_request(request, ['name', 'year_founded', 'city', 'year_disbanded', 'country'])
+@token_required(request)
 def post_bands():
     data = request.get_json()
     band = Band(name=data['name'])
