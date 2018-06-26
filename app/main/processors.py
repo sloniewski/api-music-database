@@ -3,15 +3,15 @@ from functools import wraps
 
 from flask import abort, Response, g
 
+from app.main.serializer import Serializer
+
 
 def validate_request(req, expected_args, strict=True):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            try:
-                data = req.get_json()
-            except json.decoder.JSONDecodeError:
-                abort(400, {'error': 'unable to parse json'})
+            serializer = Serializer(req)
+            data = serializer.deserialize(req.data)
 
             errors = {'errors': []}
             if strict is True:
@@ -39,7 +39,16 @@ def process_response(function):
     @wraps(function)
     def decorator(*args, **kwargs):
         data = function(*args, **kwargs)
-        result = Response(response=data)
-        result.headers['Content-Type'] = g.content_type
-        return result
+        resp = Response(response=data)
+        try:
+            resp.headers['Content-Type'] = g.content_type
+        except AttributeError:
+            resp.headers['Content-Type'] = 'text/plain'
+
+        try:
+            resp.status_code = g.status_code
+        except AttributeError:
+            resp.status_code = 200
+
+        return resp
     return decorator

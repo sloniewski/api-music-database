@@ -38,3 +38,8 @@ class Band(db.Model):
 
     def __repr__(self):
         return self.__str__()
+
+    def set_attrs(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+        return self

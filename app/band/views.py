@@ -1,4 +1,4 @@
-from flask import request, url_for, Response
+from flask import request, url_for, Response, g
 
 from app import db
 from app.auth.decorator import token_required
@@ -28,14 +28,21 @@ def band_delete(id):
 
 @band.route('/<int:id>', methods=['PUT'])
 @process_response
-@apply_media_type(request)
 @validate_request(request, ['name', 'year_founded', 'city', 'year_disbanded', 'country'])
 @token_required(request)
 def band_put(id):
-    band = Band.query.get_or_404(id)
-    raise NotImplementedError('not implemented !!')
-    # 200 OK or 201 created, or 409 Conflict
-    return '!'
+    band = Band.query.filter(Band.band_id == id).first()
+    serializer = Serializer(request)
+    data = serializer.deserialize(request.data)
+    if band is not None:
+        band.set_attrs(**data)
+        g.status_code = 200
+    else:
+        band = Band(band_id=id, **data)
+        g.status_code = 201
+    db.session.add(band)
+    db.session.commit()
+    return str(band.band_id)
 
 
 @band.route('/<int:id>', methods=['PATCH'])
@@ -92,4 +99,4 @@ def post_bands():
     band = Band(name=data['name'])
     db.session.add(band)
     db.session.commit()
-    return band.name, 201
+    return str(band.band_id), 201

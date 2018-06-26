@@ -64,9 +64,9 @@ class TestBandCollection(unittest.TestCase):
             })
         self.assertEqual(response.status_code, 400)
 
-    def test_put_band_update(self):
+    def test_put_band_create(self):
         response = self.client.put(
-            'http://localhost:5000/bands/99,',
+            'http://localhost:5000/bands/99',
             data=json.dumps({'name': 'deftones', 'year_founded': 1996,
                              'city': 'somecity', 'year_disbanded': 2011,
                              'country': 'USA'}),
@@ -76,7 +76,7 @@ class TestBandCollection(unittest.TestCase):
             })
         self.assertEqual(response.status_code, 201)
 
-    def test_put_band_create(self):
+    def test_put_band_update(self):
         response = self.client.put(
             'http://localhost:5000/bands/' + str(self.test_band.band_id),
             data=json.dumps({'name': 'deftones', 'year_founded': 1996,

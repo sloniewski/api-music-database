@@ -39,7 +39,10 @@ class XmlSerializer(BaseSerializer):
             abort(415)
         return data
 
-    
+    def deserialize(self, data):
+        abort(404)
+
+
 class Serializer:
     serializer_class = {
         'application/json': JsonSerializer,
@@ -48,7 +51,7 @@ class Serializer:
 
     def get_serializer_class(self, content_type):
         return self.serializer_class[content_type]
-    
+
     def __init__(self, content_type):
         try:
             self.serializer = self.get_serializer_class(content_type)()
