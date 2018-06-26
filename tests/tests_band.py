@@ -54,18 +54,90 @@ class TestBandCollection(unittest.TestCase):
         self.assertEqual(json_response['city'], 'xyz')
         self.assertEqual(json_response['country'], 'lebanon')
 
+    def test_fail_patch_band(self):
+        response = self.client.patch(
+            'http://localhost:5000/bands/' + str(self.test_band.band_id),
+            data=json.dumps({'city': 'xyz', 'test': 'test'}),
+            headers={
+                'Content-Type': 'application/json',
+                'X-Auth-Token': self.test_user.get_token(),
+            })
+        self.assertEqual(response.status_code, 400)
+
+    def test_put_band_update(self):
+        response = self.client.put(
+            'http://localhost:5000/bands/99,',
+            data=json.dumps({'name': 'deftones', 'year_founded': 1996,
+                             'city': 'somecity', 'year_disbanded': 2011,
+                             'country': 'USA'}),
+            headers={
+                'Content-Type': 'application/json',
+                'X-Auth-Token': self.test_user.get_token(),
+            })
+        self.assertEqual(response.status_code, 201)
+
+    def test_put_band_create(self):
+        response = self.client.put(
+            'http://localhost:5000/bands/' + str(self.test_band.band_id),
+            data=json.dumps({'name': 'deftones', 'year_founded': 1996,
+                             'city': 'somecity', 'year_disbanded': 2011,
+                             'country': 'USA'}),
+            headers={
+                'Content-Type': 'application/json',
+                'X-Auth-Token': self.test_user.get_token(),
+            })
+        self.assertEqual(response.status_code, 200)
+
+    def test_fail_put_band(self):
+        response = self.client.put(
+            'http://localhost:5000/bands/' + str(self.test_band.band_id),
+            data=json.dumps({'name': 'deftones', 'year_founded': 1996,
+                             'city': 'somecity', 'year_disbanded': 2011,
+                             }),
+            headers={
+                'Content-Type': 'application/json',
+                'X-Auth-Token': self.test_user.get_token(),
+            })
+        self.assertEqual(response.status_code, 400)
+
     def test_post_bands(self):
         response = self.client.post(
             'http://localhost:5000/bands/',
             data=json.dumps({'name': 'deftones', 'year_founded': 1996,
                              'city': 'somecity', 'year_disbanded': 2011,
-                            'country': 'USA'}),
+                             'country': 'USA'}),
             headers={
                 'Content-Type': 'application/json',
                 'X-Auth-Token': self.test_user.get_token(),
             },
         )
         self.assertEqual(response.status_code, 201)
+
+    def test_fail_post_bands(self):
+        response = self.client.post(
+            'http://localhost:5000/bands/',
+            data=json.dumps({'year_founded': 1996, 'city': 'somecity',
+                             'year_disbanded': 2011, 'country': 'USA'}),
+            headers={
+                'Content-Type': 'application/json',
+                'X-Auth-Token': self.test_user.get_token(),
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_fail_post_bands(self):
+        response = self.client.post(
+            'http://localhost:5000/bands/',
+            data=json.dumps({'name': 'deftones', 'year_founded': 1996,
+                             'city': 'somecity', 'year_disbanded': 2011,
+                            'country': 'USA', 'test': 'test'}),
+            headers={
+                'Content-Type': 'application/json',
+                'X-Auth-Token': self.test_user.get_token(),
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+
 
     def test_get_json_band(self):
         response = self.client.get(

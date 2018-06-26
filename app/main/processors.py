@@ -13,12 +13,13 @@ def validate_request(req, expected_args, strict=True):
             except json.decoder.JSONDecodeError:
                 abort(400, {'error': 'unable to parse json'})
 
-            missing = set(expected_args) - set(data)
             errors = {'errors': []}
-            if len(missing) != 0:
-                errors['errors'].append(
-                    'missing data in json: {}'.format(str(missing)[1:-1])
-                )
+            if strict is True:
+                missing = set(expected_args) - set(data)
+                if len(missing) != 0:
+                    errors['errors'].append(
+                        'missing data in json: {}'.format(str(missing)[1:-1])
+                    )
 
             extra = set(data) - set(expected_args)
             if len(extra) != 0:

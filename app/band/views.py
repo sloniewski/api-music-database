@@ -33,12 +33,15 @@ def band_delete(id):
 @token_required(request)
 def band_put(id):
     band = Band.query.get_or_404(id)
+    raise NotImplementedError('not implemented !!')
+    # 200 OK or 201 created, or 409 Conflict
     return '!'
 
 
 @band.route('/<int:id>', methods=['PATCH'])
 @process_response
 @apply_media_type(request)
+@validate_request(request, ['name', 'year_founded', 'city', 'year_disbanded', 'country'], strict=False)
 @token_required(request)
 def band_patch(id):
     band = Band.query.get_or_404(id)
