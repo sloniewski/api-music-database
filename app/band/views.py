@@ -23,6 +23,7 @@ def get_band(id):
 def band_delete(id):
     band = Band.query.get_or_404(id)
     db.session.delete(band)
+    db.session.commit()
     return '', 204
 
 

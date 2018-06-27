@@ -1,7 +1,8 @@
-import dicttoxml
 import json
+import xml.etree.ElementTree as ET
 from functools import wraps
 
+import dicttoxml
 from flask import abort, g
 
 class BaseSerializer:
@@ -40,7 +41,8 @@ class XmlSerializer(BaseSerializer):
         return data
 
     def deserialize(self, data):
-        abort(404)
+        xml = ET.fromstring(response.text)
+        return xml
 
 
 class Serializer:
