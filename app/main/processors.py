@@ -1,9 +1,21 @@
 import json
+from collections import namedtuple
 from functools import wraps
 
 from flask import abort, Response, g
 
 from app.main.serializer import Serializer
+
+
+def make_response(function):
+    @wraps(function)
+    def decorator(*args, **kwargs):
+        result = function(*args, **kwargs)
+        response = Response()
+        response.response = result[0]
+        response.status_code = result[1]
+        return response
+    return decorator
 
 
 def validate_request(req, expected_args, strict=True):
@@ -35,8 +47,61 @@ def validate_request(req, expected_args, strict=True):
     return decorator
 
 
+class AcceptHeader(object):
+
+    def __init__(self, mime_type, q):
+        self.mime_type = mime_type
+        self.q = q
+
+    def __gt__(self, other):
+        return self.q > other.q
+
+    def __lt__(self, other):
+        return self.q < other.q
+
+    def __ge__(self,other):
+        return self.q > other.q
+
+    def __le__(self, other):
+        return self.q < other.q
+
+    def __eq__(self, other):
+        return self.q == other.q
+
+    def __ne__(self, other):
+        return self.q != other.q
+
+    def __str__(self):
+        return "{} ; {}".format(self.mime_type, self.q)
+
+    def __repr__(self):
+        return self.__str__()
+
+def parse_accept_headers(text):
+    types_list = text.split(',')
+    for x in range(len(types_list)):
+        mime_type = types_list[x].split(';')[0].strip(' ')
+        q = 1.0
+        for arg in types_list[x].split(';')[1:]:
+            key, value = arg.split('=')
+            if key == 'q':
+                q = float(value)
+        types_list[x] = AcceptHeader(mime_type, q)
+    return types_list
+
+
 def negotiate_content_type(request, consumes):
-    return consumes[0]
+    accept_header = request.headers.get('Accept')
+    if accept_header is None:
+        return 'application/json'
+
+    mimi_type_objects = parse_accept_headers(accept_header)
+    mimi_type_objects.sort(reverse=True)
+    result = []
+    for object in mimi_type_objects:
+        if object.mime_type in Serializer.supported_types():
+            result.append(object)
+    return result[0].mime_type
 
 
 def process_headers(request, consumes=['application/json']):
@@ -54,12 +119,3 @@ def process_headers(request, consumes=['application/json']):
     return decorator
 
 
-def make_response(function):
-    @wraps(function)
-    def decorator(*args, **kwargs):
-        result = function(*args, **kwargs)
-        response = Response()
-        response.response = result[0]
-        response.status_code = result[1]
-        return response
-    return decorator

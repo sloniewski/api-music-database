@@ -34,7 +34,7 @@ class TestBandCollection(unittest.TestCase):
     def test_get_bands(self):
         response = self.client.get(
             'http://localhost:5000/bands/',
-            headers={'Content-Type': 'application/json'},
+            headers={'Accept': 'application/json'},
         )
         self.assertEqual(response.status_code, 200)
 
@@ -44,6 +44,7 @@ class TestBandCollection(unittest.TestCase):
             data=json.dumps({'city': 'xyz'}),
             headers={
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
                 'X-Auth-Token': self.test_user.get_token(),
             })
         json_response = response.get_json()
@@ -60,6 +61,7 @@ class TestBandCollection(unittest.TestCase):
             data=json.dumps({'city': 'xyz', 'test': 'test'}),
             headers={
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
                 'X-Auth-Token': self.test_user.get_token(),
             })
         self.assertEqual(response.status_code, 400)
@@ -72,6 +74,7 @@ class TestBandCollection(unittest.TestCase):
                              'country': 'USA'}),
             headers={
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
                 'X-Auth-Token': self.test_user.get_token(),
             })
         self.assertEqual(response.status_code, 201)
@@ -84,6 +87,7 @@ class TestBandCollection(unittest.TestCase):
                              'country': 'USA'}),
             headers={
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
                 'X-Auth-Token': self.test_user.get_token(),
             })
         self.assertEqual(response.status_code, 200)
@@ -96,6 +100,7 @@ class TestBandCollection(unittest.TestCase):
                              }),
             headers={
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
                 'X-Auth-Token': self.test_user.get_token(),
             })
         self.assertEqual(response.status_code, 400)
@@ -133,6 +138,7 @@ class TestBandCollection(unittest.TestCase):
                             'country': 'USA', 'test': 'test'}),
             headers={
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
                 'X-Auth-Token': self.test_user.get_token(),
             },
         )
@@ -142,7 +148,7 @@ class TestBandCollection(unittest.TestCase):
     def test_get_json_band(self):
         response = self.client.get(
             'http://localhost:5000/bands/{}'.format(self.test_band.band_id),
-            headers={'Content-Type': 'application/json'},
+            headers={'Accept': 'application/json'},
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.headers.get('Content-Type'), 'application/json')
@@ -150,7 +156,7 @@ class TestBandCollection(unittest.TestCase):
     def test_get_xml_band(self):
         response = self.client.get(
             'http://localhost:5000/bands/{}'.format(self.test_band.band_id),
-            headers={'Content-Type': 'application/xml'},
+            headers={'Accept': 'application/xml'},
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.headers.get('Content-Type'), 'application/xml')

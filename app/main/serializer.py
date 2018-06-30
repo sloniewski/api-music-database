@@ -63,6 +63,10 @@ class Serializer:
             self.serializer = JsonSerializer()
             self.content_type = 'application/json'
 
+    @classmethod
+    def supported_types(cls):
+        return cls.serializer_class.keys()
+
     def serialize(self, data):
         return self.serializer.serialize(data)
 
