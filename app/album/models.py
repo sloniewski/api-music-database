@@ -26,3 +26,10 @@ class Album(db.Model):
 
     def __repr__(self):
         return self.__str__()
+
+    def as_dict(self):
+        attributes = ['album_id', 'name', 'year_released', 'band_id']
+        result = {}
+        for attribute in attributes:
+            result[attribute] = getattr(self, attribute, None)
+        return result

@@ -2,23 +2,25 @@ from flask import request, url_for, Response, g
 
 from app import db
 from app.auth.decorator import token_required
-from app.main.serializer import apply_media_type, Serializer
+from app.main.serializer import Serializer, serialize_response
 from app.main.pagination import PaginationHelper
-from app.main.processors import validate_request, process_response
+from app.main.processors import validate_request, process_headers, make_response
 
 from . import band
 from .models import Band
 
 
 @band.route('/<int:id>', methods=['GET'])
-@process_response
-@apply_media_type(request)
+@serialize_response
+@process_headers(request)
+@make_response
 def get_band(id):
     band = Band.query.get_or_404(id)
-    return band.as_dict()
+    return band.as_dict(), 200
 
 
 @band.route('/<int:id>', methods=['DELETE'])
+@make_response
 @token_required(request)
 def band_delete(id):
     band = Band.query.get_or_404(id)
@@ -28,7 +30,8 @@ def band_delete(id):
 
 
 @band.route('/<int:id>', methods=['PUT'])
-@process_response
+@process_headers(request)
+@make_response
 @validate_request(request, ['name', 'year_founded', 'city', 'year_disbanded', 'country'])
 @token_required(request)
 def band_put(id):
@@ -43,12 +46,13 @@ def band_put(id):
         g.status_code = 201
     db.session.add(band)
     db.session.commit()
-    return str(band.band_id)
+    return str(band.band_id), g.status_code
 
 
 @band.route('/<int:id>', methods=['PATCH'])
-@process_response
-@apply_media_type(request)
+@serialize_response
+@process_headers(request)
+@make_response
 @validate_request(request, ['name', 'year_founded', 'city', 'year_disbanded', 'country'], strict=False)
 @token_required(request)
 def band_patch(id):
@@ -64,12 +68,13 @@ def band_patch(id):
     db.session.add(band)
     db.session.commit()
 
-    return band.as_dict()
+    return band.as_dict(), 200
 
 
 @band.route('/', methods=['GET'])
-@process_response
-@apply_media_type(request)
+@serialize_response
+@process_headers(request)
+@make_response
 def get_bands():
     bands = db.session.query(Band)
     pagination = PaginationHelper(
@@ -89,10 +94,11 @@ def get_bands():
         resp["next"] = root + url_for('.get_bands', page=pagination.next_page)
     if pagination.prev_page is not None:
         resp["prev"] = root + url_for('.get_bands', page=pagination.prev_page)
-    return resp
+    return resp, 200
 
 
 @band.route('/', methods=['POST'])
+@make_response
 @validate_request(request, ['name', 'year_founded', 'city', 'year_disbanded', 'country'])
 @token_required(request)
 def post_bands():

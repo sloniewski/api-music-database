@@ -125,7 +125,7 @@ class TestBandCollection(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 400)
 
-    def test_fail_post_bands(self):
+    def test_fail_post_bands_2(self):
         response = self.client.post(
             'http://localhost:5000/bands/',
             data=json.dumps({'name': 'deftones', 'year_founded': 1996,

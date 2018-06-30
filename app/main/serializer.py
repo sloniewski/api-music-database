@@ -5,12 +5,13 @@ from functools import wraps
 import dicttoxml
 from flask import abort, g
 
+
 class BaseSerializer:
 
     def serialize(self, data):
         raise NotImplementedError('method not implemented')
 
-    def deserialize(self,data):
+    def deserialize(self, data):
         raise NotImplementedError('method not implemented')
 
 
@@ -41,7 +42,7 @@ class XmlSerializer(BaseSerializer):
         return data
 
     def deserialize(self, data):
-        xml = ET.fromstring(response.text)
+        xml = ET.fromstring(data)
         return xml
 
 
@@ -69,16 +70,14 @@ class Serializer:
         return self.serializer.deserialize(data)
 
 
-def apply_media_type(req):
+def serialize_response(function):
+    @wraps(function)
+    def decorator(*args, **kwargs):
+        response = function(*args, **kwargs)
 
-    def decorator(function):
-        @wraps(function)
-        def wrapper(*args, **kwargs):
-            content_type = req.headers.get('Content-Type')
-            serializer = Serializer(content_type)
-            data = function(*args, **kwargs)
-            data = serializer.serialize(data)
-            g.content_type = serializer.content_type
-            return data
-        return wrapper
+        serializer = Serializer(g.content_type)
+        data = serializer.serialize(response.response)
+        response.response = data
+
+        return response
     return decorator

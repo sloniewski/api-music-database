@@ -35,20 +35,31 @@ def validate_request(req, expected_args, strict=True):
     return decorator
 
 
-def process_response(function):
+def negotiate_content_type(request, consumes):
+    return consumes[0]
+
+
+def process_headers(request, consumes=['application/json']):
+    def decorator(function):
+        @wraps(function)
+        def wrapper(*args, **kwargs):
+            response = function(*args, **kwargs)
+
+            content_type = negotiate_content_type(request, consumes)
+            response.headers['Content-Type'] = content_type
+            g.content_type = content_type
+
+            return response
+        return wrapper
+    return decorator
+
+
+def make_response(function):
     @wraps(function)
     def decorator(*args, **kwargs):
-        data = function(*args, **kwargs)
-        resp = Response(response=data)
-        try:
-            resp.headers['Content-Type'] = g.content_type
-        except AttributeError:
-            resp.headers['Content-Type'] = 'text/plain'
-
-        try:
-            resp.status_code = g.status_code
-        except AttributeError:
-            resp.status_code = 200
-
-        return resp
+        result = function(*args, **kwargs)
+        response = Response()
+        response.response = result[0]
+        response.status_code = result[1]
+        return response
     return decorator
