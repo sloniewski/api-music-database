@@ -90,7 +90,7 @@ def parse_accept_headers(text):
     return types_list
 
 
-def negotiate_content_type(request, consumes):
+def negotiate_content_type(request):
     accept_header = request.headers.get('Accept')
     if accept_header is None:
         return 'application/json'
@@ -104,7 +104,7 @@ def negotiate_content_type(request, consumes):
     return result[0].mime_type
 
 
-def process_headers(request, consumes=['application/json']):
+def process_headers(request):
     def decorator(function):
         @wraps(function)
         def wrapper(*args, **kwargs):
