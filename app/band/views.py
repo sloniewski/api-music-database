@@ -1,10 +1,9 @@
-from flask import request, url_for, Response, g
+from flask import request, url_for, g
 
 from app import db
 from app.auth.decorator import token_required
-from app.main.serializer import Serializer, serialize_response
+from app.main.serializer import Serializer
 from app.main.pagination import PaginationHelper
-from app.main.processors import validate_request, process_headers
 
 from app.main.response_processors import process_response
 from app.main.request_processors import process_request, validate_request_data
@@ -23,6 +22,7 @@ def get_band(id):
 
 @band.route('/<int:id>', methods=['DELETE'])
 @process_response
+@process_request
 @token_required(request)
 def band_delete(id):
     band = Band.query.get_or_404(id)
