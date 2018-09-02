@@ -36,7 +36,7 @@ class JsonSerializer(BaseSerializer):
 class TextSerializer(BaseSerializer):
 
     def serialize(self, data):
-        return data
+        return str(data)
 
     def deserialize(self, data):
         return data
@@ -85,6 +85,10 @@ class Serializer:
     @classmethod
     def supported_types(cls):
         return cls.serializer_class.keys()
+
+    @staticmethod
+    def accepted_types():
+        return ['application/json', 'application/xml']
 
     @classmethod
     def default_type(cls):

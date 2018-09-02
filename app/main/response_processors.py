@@ -2,9 +2,7 @@ from functools import wraps
 
 from flask import (
     make_response,
-    request,
     g,
-    Response,
 )
 
 from .serializer import Serializer
@@ -24,5 +22,6 @@ def process_response(func):
         response = make_response(result)
         response.headers.add('Content-Language', 'en-US')
         response.headers.set('Content-Type', g.response_content_type)
+
         return response
     return decorator

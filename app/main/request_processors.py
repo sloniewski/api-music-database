@@ -16,19 +16,25 @@ def process_request(func):
         result = func(*args, **kwargs)
 
         # set response content type in global context
-        content_type = None
+        accept_content_type = None
         def_q = 0
         for c_type, q in request.accept_mimetypes:
             if c_type in Serializer.supported_types() and q > def_q:
-                content_type = c_type
+                accept_content_type = c_type
                 def_q = q
 
-        if content_type == '*/*':
-            content_type = Serializer.default_type()
+        if accept_content_type == '*/*':
+            accept_content_type = Serializer.default_type()
 
-        if not content_type:
-            abort(415)
-        g.response_content_type = content_type
+        if not accept_content_type:
+            abort(415, 'requested media type is not supported')
+        g.response_content_type = accept_content_type
+
+        # check if request content type can be digested
+        if request.method in ['POST', 'PUT', 'PATCH']:
+            content_type = request.headers.get('Content-Type')
+            if not content_type or content_type not in Serializer.accepted_types():
+                abort(415, 'server did not recognize media type')
 
         return result
     return decorator

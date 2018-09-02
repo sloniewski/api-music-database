@@ -31,6 +31,7 @@ class Band(db.Model):
             'year_disbanded', 'city', 'country']
         for field in fields:
             result.update({field: getattr(self, field, None)})
+        result['self'] = self.get_absolute_url()
         return result
 
     def __str__(self):

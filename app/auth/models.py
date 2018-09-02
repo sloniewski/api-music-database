@@ -1,3 +1,5 @@
+from flask import url_for
+
 from datetime import datetime, timedelta
 from uuid import uuid4
 
@@ -73,3 +75,10 @@ class User(db.Model):
             db.session.add(token)
             db.session.commit()
         return token.uuid
+
+    def as_dict(self):
+        return {
+            'user_id': self.user_id,
+            'username': self.username,
+            'self': url_for('auth.get_user', id=self.user_id),
+        }

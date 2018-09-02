@@ -4,35 +4,37 @@ from app import db
 from app.auth.decorator import token_required
 from app.main.serializer import Serializer, serialize_response
 from app.main.pagination import PaginationHelper
-from app.main.processors import validate_request, process_headers, make_response
+from app.main.processors import validate_request, process_headers
+
+from app.main.response_processors import process_response
+from app.main.request_processors import process_request, validate_request_data
 
 from . import band
 from .models import Band
 
 
 @band.route('/<int:id>', methods=['GET'])
-@serialize_response
-@process_headers(request)
-@make_response
+@process_response
+@process_request
 def get_band(id):
     band = Band.query.get_or_404(id)
     return band.as_dict(), 200
 
 
 @band.route('/<int:id>', methods=['DELETE'])
-@make_response
+@process_response
 @token_required(request)
 def band_delete(id):
     band = Band.query.get_or_404(id)
     db.session.delete(band)
     db.session.commit()
-    return '', 204
+    return 'no content', 204
 
 
 @band.route('/<int:id>', methods=['PUT'])
-@process_headers(request)
-@make_response
-@validate_request(request, ['name', 'year_founded', 'city', 'year_disbanded', 'country'])
+@process_response
+@validate_request_data(['name', 'year_founded', 'city', 'year_disbanded', 'country'])
+@process_request
 @token_required(request)
 def band_put(id):
     band = Band.query.filter(Band.band_id == id).first()
@@ -46,14 +48,13 @@ def band_put(id):
         g.status_code = 201
     db.session.add(band)
     db.session.commit()
-    return str(band.band_id), g.status_code
+    return band.as_dict(), g.status_code
 
 
 @band.route('/<int:id>', methods=['PATCH'])
-@serialize_response
-@process_headers(request)
-@make_response
-@validate_request(request, ['name', 'year_founded', 'city', 'year_disbanded', 'country'], strict=False)
+@process_response
+@validate_request_data(['name', 'year_founded', 'city', 'year_disbanded', 'country'], strict=False)
+@process_request
 @token_required(request)
 def band_patch(id):
     band = Band.query.get_or_404(id)
@@ -72,9 +73,8 @@ def band_patch(id):
 
 
 @band.route('/', methods=['GET'])
-@serialize_response
-@process_headers(request)
-@make_response
+@process_response
+@process_request
 def get_bands():
     bands = db.session.query(Band)
     pagination = PaginationHelper(
@@ -98,12 +98,14 @@ def get_bands():
 
 
 @band.route('/', methods=['POST'])
-@make_response
-@validate_request(request, ['name', 'year_founded', 'city', 'year_disbanded', 'country'])
+@process_response
+@validate_request_data(['name', 'year_founded', 'city', 'year_disbanded', 'country'])
+@process_request
 @token_required(request)
 def post_bands():
-    data = request.get_json()
-    band = Band(name=data['name'])
+    serializer = Serializer(request.content_type)
+    data = serializer.deserialize(request.data)
+    band = Band(**data)
     db.session.add(band)
     db.session.commit()
-    return str(band.band_id), 201
+    return band.as_dict(), 201
