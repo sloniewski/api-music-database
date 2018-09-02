@@ -28,17 +28,31 @@ class JsonSerializer(BaseSerializer):
         try:
             data = json.loads(str(data, encoding='utf-8'))
         except json.JSONDecodeError as error:
+            print(error.msg)
             abort(415, error.msg)
+        return data
+
+
+class TextSerializer(BaseSerializer):
+
+    def serialize(self, data):
+        return data
+
+    def deserialize(self, data):
         return data
 
 
 class XmlSerializer(BaseSerializer):
 
     def serialize(self, data):
+
+        if isinstance(data, (str, int)):
+            data = [data]
+
         try:
             data = dicttoxml.dicttoxml(data)
-        except Exception:
-            abort(415)
+        except Exception as err:
+            abort(415, str(err))
         return data
 
     def deserialize(self, data):
@@ -47,9 +61,14 @@ class XmlSerializer(BaseSerializer):
 
 
 class Serializer:
+    _default_type = 'application/json'
+
     serializer_class = {
+        '*/*': JsonSerializer,
         'application/json': JsonSerializer,
         'application/xml': XmlSerializer,
+        'text/html': TextSerializer,
+        'text/plain': TextSerializer,
     }
 
     def get_serializer_class(self, content_type):
@@ -67,6 +86,10 @@ class Serializer:
     def supported_types(cls):
         return cls.serializer_class.keys()
 
+    @classmethod
+    def default_type(cls):
+        return cls._default_type
+
     def serialize(self, data):
         return self.serializer.serialize(data)
 
@@ -74,10 +97,10 @@ class Serializer:
         return self.serializer.deserialize(data)
 
 
-def serialize_response(function):
-    @wraps(function)
+def serialize_response(func):
+    @wraps(func)
     def decorator(*args, **kwargs):
-        response = function(*args, **kwargs)
+        response = func(*args, **kwargs)
 
         serializer = Serializer(g.content_type)
         data = serializer.serialize(response.response)

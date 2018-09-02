@@ -1,5 +1,3 @@
-import json
-from collections import namedtuple
 from functools import wraps
 
 from flask import abort, Response, g
@@ -109,12 +107,10 @@ def process_headers(request):
         @wraps(function)
         def wrapper(*args, **kwargs):
             response = function(*args, **kwargs)
-            content_type = negotiate_content_type(request)
-            response.headers['Content-Type'] = content_type
-            g.content_type = content_type
+            # content_type = negotiate_content_type(request)
+            # response.headers['Content-Type'] = content_type
+            g.content_type = 'application/json' # content_type
 
             return response
         return wrapper
     return decorator
-
-
